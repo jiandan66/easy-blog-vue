@@ -30,6 +30,11 @@ const routes: RouteRecordRaw[] = [
                 path: '/blog/tag/list',
                 name: 'Tag',
                 component: () => import('@/page/tag/tag.vue')
+            },
+            {
+                path: '/blog/system/dict',
+                name: 'Dict',
+                component: () => import('@/page/system/dict.vue')
             }
         ]
     }

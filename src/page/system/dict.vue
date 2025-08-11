@@ -1,16 +1,16 @@
 <template>
   <div class="user-management">
     <div class="page-header">
-      <h2>标签管理</h2>
+      <h2>字典管理</h2>
     </div>
 
     <!-- 搜索区域 -->
     <div class="search-area">
       <el-form :model="searchForm" inline class="search-form">
-        <el-form-item label="标签名称">
+        <el-form-item label="字典名称">
           <el-input
-              v-model="searchForm.tagName"
-              placeholder="请输入标签名称"
+              v-model="searchForm.name"
+              placeholder="请输入字典名称"
               clearable
               @keyup.enter="handleSearch"
               style="width: 200px"
@@ -29,22 +29,23 @@
             </el-icon>
             重置
           </el-button>
-          <el-button type="primary" @click="handleAddTag">新增标签</el-button>
+          <el-button type="primary" @click="handleAddDict">新增字典</el-button>
         </el-form-item>
       </el-form>
     </div>
 
     <el-table :data="tableData" border style="width: 100%">
-      <el-table-column prop="tagId" label="标签ID" min-width="180" show-overflow-tooltip/>
-      <el-table-column prop="tagName" label="标签名称" min-width="120" show-overflow-tooltip/>
+      <el-table-column prop="id" label="字典ID" min-width="180" show-overflow-tooltip/>
+      <el-table-column prop="name" label="字典名称" min-width="120" show-overflow-tooltip/>
+      <el-table-column prop="value" label="字典值" min-width="120" show-overflow-tooltip/>
       <el-table-column label="操作" min-width="150" fixed="right" align="center">
         <template #default="scope">
-          <el-button size="small" @click="handleEditTag(scope.row)">编辑</el-button>
+          <el-button size="small" @click="handleEditDict(scope.row)">编辑</el-button>
           <el-popconfirm
-              title="确定要删除这个标签吗？"
+              title="确定要删除这个字典吗？"
               confirm-button-text="确定"
               cancel-button-text="取消"
-              @confirm="handleDeleteTag(scope.row)"
+              @confirm="handleDeleteDict(scope.row)"
           >
             <template #reference>
               <el-button size="small" type="danger">删除</el-button>
@@ -71,7 +72,7 @@
     <!-- 编辑弹窗 -->
     <el-dialog
         v-model="editDialogVisible"
-        :title="isEdit ? '编辑标签' : '新增标签'"
+        :title="isEdit ? '编辑字典' : '新增字典'"
         :width="isMobile ? '90%' : '500px'"
         :close-on-click-modal="false"
         class="user-dialog"
@@ -81,15 +82,18 @@
           :model="editForm"
           label-width="100px"
       >
-        <el-form-item label="标签名称" prop="nickname">
-          <el-input v-model="editForm.tagName" placeholder="请输入标签名称"/>
+        <el-form-item label="字典名称" prop="nickname">
+          <el-input v-model="editForm.name" placeholder="请输入字典名称"/>
+        </el-form-item>
+        <el-form-item label="字典值" prop="nickname">
+          <el-input v-model="editForm.value" placeholder="请输入字典值"/>
         </el-form-item>
       </el-form>
 
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="editDialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleSaveTag" :loading="saveLoading">
+          <el-button type="primary" @click="handleSaveDict" :loading="saveLoading">
             确定
           </el-button>
         </span>
@@ -102,8 +106,13 @@
 import {onMounted, reactive, ref} from "vue";
 import {ElMessage, type FormInstance} from "element-plus";
 import {Refresh, Search} from "@element-plus/icons-vue";
-import {api_tag_del, api_tag_edit, api_tag_list, api_tag_save} from "@/api/api.ts";
+import {
+  api_dict_del,
+  api_dict_edit, api_dict_list,
+  api_dict_save
+} from "@/api/api.ts";
 import type {TagItem} from "@/page/tag/tag.ts";
+import type {DictItem} from "@/page/system/dict.ts";
 
 const tableData = ref<TagItem[]>([]);
 const editFormRef = ref<FormInstance>();
@@ -128,7 +137,7 @@ const saveLoading = ref(false);
 // 搜索相关
 const searchLoading = ref(false);
 const searchForm = reactive({
-  tagName: '',
+  name: '',
 });
 
 // 分页相关
@@ -141,28 +150,27 @@ const pagination = reactive({
 
 // 编辑表单
 const editForm = reactive({
-  tagId: '' as string | number,
-  tagName: '',
+  id: '' as string | number,
+  name: '',
+  value: '',
 });
 
 
 // 获取列表
-const loadTagList = async (params = {}) => {
+const loadDictList = async (params = {}) => {
   try {
     const requestParams = {
       current: pagination.current,
       size: pagination.size,
       ...params
     };
-    const {code, data} = await api_tag_list(requestParams);
+    const {code, data} = await api_dict_list(requestParams);
     if (code === 0) {
       tableData.value = data.records || []
       pagination.total = data.total || 0;
-    } else {
-      ElMessage.error('获取标签列表失败');
     }
   } catch (error) {
-    ElMessage.error('获取标签列表失败');
+    ElMessage.error('获取字典列表失败');
   }
 };
 
@@ -170,13 +178,13 @@ const loadTagList = async (params = {}) => {
 const handleSizeChange = (size: number) => {
   pagination.size = size;
   pagination.current = 1; // 重置到第一页
-  loadTagList();
+  loadDictList();
 };
 
 // 处理当前页变化
 const handleCurrentChange = (current: number) => {
   pagination.current = current;
-  loadTagList();
+  loadDictList();
 };
 
 // 搜索
@@ -185,9 +193,9 @@ const handleSearch = async () => {
   try {
     pagination.current = 1; // 搜索时重置到第一页
     const params = {
-      tagName: searchForm.tagName.trim()
+      name: searchForm.name.trim()
     };
-    await loadTagList(params);
+    await loadDictList(params);
   } catch (error) {
   } finally {
     searchLoading.value = false;
@@ -196,36 +204,38 @@ const handleSearch = async () => {
 
 // 重置搜索
 const handleReset = () => {
-  searchForm.tagName = '';
+  searchForm.name = '';
   pagination.current = 1; // 重置时回到第一页
-  loadTagList();
+  loadDictList();
 };
 
-// 新增标签
-const handleAddTag = () => {
+// 新增字典
+const handleAddDict = () => {
   isEdit.value = false;
   resetEditForm();
   editDialogVisible.value = true;
 };
 
-// 编辑标签
-const handleEditTag = async (row: TagItem) => {
+// 编辑字典
+const handleEditDict = async (row: DictItem) => {
   isEdit.value = true;
-  editForm.tagId = row.tagId || '';
-  editForm.tagName = row.tagName;
+  editForm.id = row.id || '';
+  editForm.name = row.name;
+  editForm.value = row.value;
   editDialogVisible.value = true;
 };
 
 // 重置编辑表单
 const resetEditForm = () => {
-  editForm.tagId = '';
-  editForm.tagName = '';
+  editForm.id = '';
+  editForm.name = '';
+  editForm.value = '';
   editFormRef.value?.clearValidate();
 };
 
 
 // 保存
-const handleSaveTag = async () => {
+const handleSaveDict = async () => {
   if (!editFormRef.value) return;
 
   try {
@@ -236,22 +246,18 @@ const handleSaveTag = async () => {
     const submitData = { ...editForm };
 
     if (isEdit.value) {
-      const {data} = await api_tag_edit(submitData)
-      if (data) {
-        ElMessage.success("编辑标签成功");
-      } else {
-        ElMessage.error("编辑标签失败");
+      const {code} = await api_dict_edit(submitData)
+      if (code==0) {
+        ElMessage.success("编辑字典成功");
       }
     } else {
-      const {data} = await api_tag_save(submitData);
-      if (data) {
-        ElMessage.success("新增标签成功");
-      } else {
-        ElMessage.error("新增标签失败");
+      const {code} = await api_dict_save(submitData);
+      if (code==0) {
+        ElMessage.success("新增字典成功");
       }
     }
     editDialogVisible.value = false;
-    await loadTagList();
+    await loadDictList();
   } catch (error) {
   } finally {
     saveLoading.value = false;
@@ -259,21 +265,21 @@ const handleSaveTag = async () => {
 };
 
 // 删除
-const handleDeleteTag = async (row: TagItem) => {
+const handleDeleteDict = async (row: DictItem) => {
   try {
-    const {data} = await api_tag_del(row.tagId?.toString() || '');
-    if (data) {
-      ElMessage.success("删除标签成功");
+    const {code} = await api_dict_del(row.id?.toString() || '');
+    if (code==0) {
+      ElMessage.success("删除字典成功");
     }
-    await loadTagList(); // 重新加载列表
+    await loadDictList(); // 重新加载列表
   } catch (error) {
-    ElMessage.error('删除标签失败');
+    ElMessage.error('删除字典失败');
   }
 };
 
 onMounted(() => {
   checkScreenSize(); // 初始化屏幕尺寸检测
-  loadTagList();
+  loadDictList();
 });
 </script>
 

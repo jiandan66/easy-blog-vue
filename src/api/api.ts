@@ -82,10 +82,31 @@ export const api_tag_edit = (body: any) => put("/modules/tags/updateTag",body);
  */
 export const api_tag_save = (body: any) => post("/modules/tags/insertTag",body);
 /**
- * 标签用户
+ * 删除标签
  * @param tagId
  */
 export const api_tag_del = (tagId: any) => del (`/modules/tags/deleteTag?tagId=${tagId}`);
+
+/**
+ * 字典列表
+ * @param body
+ */
+export const api_dict_list = (body: any) => post("/dict/pageDict",body);
+/**
+ * 编辑字典
+ * @param body
+ */
+export const api_dict_edit = (body: any) => post("/dict/updateDict",body);
+/**
+ * 新增字典
+ * @param body
+ */
+export const api_dict_save = (body: any) => post("/dict/saveDict",body);
+/**
+ * 删除字典
+ * @param dictId
+ */
+export const api_dict_del = (dictId: any) => del (`/dict/deleteDict?dictId=${dictId}`);
 
 
 

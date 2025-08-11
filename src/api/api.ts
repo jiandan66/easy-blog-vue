@@ -66,5 +66,26 @@ export const api_user_save = (body: any) => post("/modules/user/insertUser",body
  */
 export const api_user_del = (userId: any) => del (`/modules/user/deleteUserByUserId?userId=${userId}`);
 
+/**
+ * 标签列表
+ * @param body
+ */
+export const api_tag_list = (body: any) => post("/modules/tags/pageTag",body);
+/**
+ * 编辑标签
+ * @param body
+ */
+export const api_tag_edit = (body: any) => put("/modules/tags/updateTag",body);
+/**
+ * 新增标签
+ * @param body
+ */
+export const api_tag_save = (body: any) => post("/modules/tags/insertTag",body);
+/**
+ * 标签用户
+ * @param tagId
+ */
+export const api_tag_del = (tagId: any) => del (`/modules/tags/deleteTag?tagId=${tagId}`);
+
 
 

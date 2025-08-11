@@ -179,7 +179,7 @@ const isValidIcon = (iconName: string | null): boolean => {
     'Cog', 'Tools', 'Build', 'Repair', 'Maintenance', 'Dashboard', 'Chart', 'Graph',
     'Table', 'List', 'Grid', 'Card', 'Box', 'Container', 'Panel', 'Window', 'Door',
     'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'CaretTop', 'CaretBottom',
-    'CaretLeft', 'CaretRight', 'DArrowLeft', 'DArrowRight', 'Expand', 'Fold'
+    'CaretLeft', 'CaretRight', 'DArrowLeft', 'DArrowRight', 'Expand', 'Fold','Tickets'
   ];
 
   return validIcons.includes(iconName);

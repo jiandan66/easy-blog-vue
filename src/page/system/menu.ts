@@ -1,7 +1,7 @@
 //菜单ts
 export interface MenuItem {
-    id: number;
-    parentId: number;
+    id: number | string;
+    parentId: number | string;
     name: string;
     perms: string | null;
     type: number;

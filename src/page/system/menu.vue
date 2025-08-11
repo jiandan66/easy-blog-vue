@@ -53,12 +53,16 @@
               check-strictly
               :render-after-expand="false"
               @change="handleTreeSelectChange"
+              clearable
+              style="width: 100%"
           >
             <template #default="{ data }">
               <span>{{ data.name }}</span>
             </template>
           </el-tree-select>
-
+          <div v-if="selectedParentId !== 0 && selectedParentId !== '0'" style="margin-top: 5px; font-size: 12px; color: #909399;">
+            当前上级菜单: {{ getParentMenuName(selectedParentId) }}
+          </div>
         </el-form-item>
 
         <el-form-item label="菜单类型">
@@ -122,7 +126,7 @@ const menu = ref<MenuItem>({
 const saveDialogVisible = ref(false);
 const diaLogTitle = ref("新增菜单");
 const operationType = ref<'add' | 'edit'>('add');
-const selectedParentId = ref<number>(0);
+const selectedParentId = ref<number | string>("0");
 
 const treeSelectProps = {
   value: 'id',
@@ -130,16 +134,40 @@ const treeSelectProps = {
   children: 'list',
 };
 
-
 // 为树形选择器准备数据，添加顶级菜单选项
 const treeSelectData = computed(() => {
   const topLevelOption = {
-    id: 0,
+    id: "0",
     name: "顶级菜单",
     list: []
   };
   return [topLevelOption, ...menuList.value];
 });
+
+// 根据选中的parentId获取父菜单名称
+const getParentMenuName = (parentId: number | string): string => {
+  if (parentId === 0 || parentId === "0") return "顶级菜单";
+  
+  const findMenuById = (menus: MenuItem[], targetId: number | string): MenuItem | null => {
+    for (const menu of menus) {
+      // 使用字符串比较，确保类型一致
+      if (String(menu.id) === String(targetId)) {
+        return menu;
+      }
+      if (menu.list && menu.list.length > 0) {
+        const found = findMenuById(menu.list, targetId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+  
+  const parentMenu = findMenuById(menuList.value, parentId);
+  return parentMenu ? parentMenu.name : `ID: ${parentId}`;
+};
+
+
+
 
 // 获取菜单信息
 const getMenuList = async () => {
@@ -196,7 +224,7 @@ const saveOrUpdateMenu = async (row: MenuItem | null, type: 'add' | 'edit') => {
   } else {
     menu.value = {
       id: 0,
-      parentId: row?.id || 0,
+      parentId: row?.id || "0",
       name: "",
       perms: "",
       type: 1,
@@ -206,17 +234,17 @@ const saveOrUpdateMenu = async (row: MenuItem | null, type: 'add' | 'edit') => {
       parentName: "",
       list: [],
     };
-    selectedParentId.value = row?.id || 0;
+    selectedParentId.value = row?.id || "0";
   }
   await getMenuList();
 }
 
-const handleTreeSelectChange = (value: number) => {
-  menu.value.parentId = value || 0;
+const handleTreeSelectChange = (value: number | string) => {
+  menu.value.parentId = value || "0";
 };
 
 const getParentPlaceholder = () => {
-  if (selectedParentId.value === 0) {
+  if (selectedParentId.value === 0 || selectedParentId.value === "0") {
     return "顶级菜单";
   }
   return "请选择上级菜单";
@@ -233,7 +261,7 @@ const handleSave = async () => {
 
 };
 
-const deleteMenu = async (row: number) => {
+const deleteMenu = async (row: number | string) => {
   const {code} = await api_menu_delete(row)
   if (code == 0) {
     ElMessage.success("成功")

@@ -43,7 +43,7 @@ export const api_menu_add_or_update = (body: any) => post("/menu/saveOrUpdate", 
 /**
  * 删除菜单
  */
-export const api_menu_delete = (id: number) => get(`/menu/delete/${id}`);
+export const api_menu_delete = (id: number | string) => get(`/menu/delete/${id}`);
 
 /**
  * 用户列表

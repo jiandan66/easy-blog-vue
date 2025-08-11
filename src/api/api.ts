@@ -1,4 +1,4 @@
-import {get, post} from "@/request/method";
+import {get, post,put,del} from "@/request/method";
 
 
 /**
@@ -13,9 +13,9 @@ export const api_login = (body: any) => post("/user/login", body);
 export const api_email_login = (body: any) => post("/user/emailLogin", body);
 /**
  * 发送邮箱验证码
- * @param email
+ * @param body
  */
-export const api_send_email = (email: any) => get(`/user/emailCode?email=${email}`);
+export const api_send_email = (body: any) => post("/user/emailCode", body);
 /**
  * 获取图像验证码
  * @param uuid
@@ -44,6 +44,27 @@ export const api_menu_add_or_update = (body: any) => post("/menu/saveOrUpdate", 
  * 删除菜单
  */
 export const api_menu_delete = (id: number) => get(`/menu/delete/${id}`);
+
+/**
+ * 用户列表
+ * @param body
+ */
+export const api_user_list = (body: any) => post("/modules/user/pageUser",body);
+/**
+ * 编辑用户
+ * @param body
+ */
+export const api_user_edit = (body: any) => put("/modules/user/updateUserByUserId",body);
+/**
+ * 新增用户
+ * @param body
+ */
+export const api_user_save = (body: any) => post("/modules/user/insertUser",body);
+/**
+ * 删除用户
+ * @param userId
+ */
+export const api_user_del = (userId: any) => del (`/modules/user/deleteUserByUserId?userId=${userId}`);
 
 
 

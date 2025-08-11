@@ -19,13 +19,14 @@ export function get(url: string, data: any = {}, api?: string) {
     baseUrl = api;
   }
   url =
-    baseUrl + url + (Object.keys(data).length ? "?" : "") + params.join("&");
+      baseUrl + url + (Object.keys(data).length ? "?" : "") + params.join("&");
   return service({
     url,
     method: "GET",
     data,
   });
 }
+
 /**
  * post请求
  * @param url 请求地址
@@ -37,6 +38,36 @@ export function post(url: string, data = {}) {
   return service({
     url,
     method: "POST",
+    data,
+  });
+}
+
+/**
+ * put请求
+ * @param url 请求地址
+ * @param data 请求参数
+ * @returns
+ */
+export function put(url: string, data = {}) {
+  url = prefix + url;
+  return service({
+    url,
+    method: "PUT",
+    data,
+  });
+}
+
+/**
+ * delete请求
+ * @param url 请求地址
+ * @param data 请求参数
+ * @returns
+ */
+export function del(url: string, data = {}) {
+  url = prefix + url;
+  return service({
+    url,
+    method: "DELETE",
     data,
   });
 }

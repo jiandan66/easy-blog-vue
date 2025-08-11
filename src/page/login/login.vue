@@ -61,7 +61,7 @@
           <div class="captcha-input">
                          <input
                  id="captcha"
-                 v-model="passwordForm.captcha"
+                 v-model="passwordForm.kaptChaCode"
                  type="text"
                  placeholder="请输入验证码"
                  maxlength="6"
@@ -75,10 +75,6 @@
         </div>
 
         <div class="form-options">
-          <label class="checkbox-label">
-            <input type="checkbox" v-model="passwordForm.remember"/>
-            <span>记住我</span>
-          </label>
           <a href="#" class="forgot-link">忘记密码？</a>
         </div>
 
@@ -110,7 +106,7 @@
           <div class="captcha-input">
                          <input
                  id="email-captcha"
-                 v-model="emailForm.captcha"
+                 v-model="emailForm.kaptChaCode"
                  type="text"
                  placeholder="请输入验证码"
                  maxlength="6"
@@ -183,20 +179,21 @@ const emailCaptchaUuid = ref('')
 const passwordForm = reactive({
   account: '',
   pwd: '',
-  remember: false,
-  captcha: ''
+  kaptChaCode: '',
+  uuid: ''
 })
 
 // 邮箱验证码登录表单
 const emailForm = reactive({
   account: '',
   emailCode: '',
-  captcha: ''
+  kaptChaCode: '',
+  uuid: ''
 })
 
 // 处理账号密码登录
 const handlePasswordLogin = async () => {
-  if (!passwordForm.account || !passwordForm.pwd || !passwordForm.captcha) {
+  if (!passwordForm.account || !passwordForm.pwd || !passwordForm.kaptChaCode) {
     ElMessage.warning('请填写完整信息')
     return
   }
@@ -204,11 +201,16 @@ const handlePasswordLogin = async () => {
   loading.value = true
   try {
     // 先校验图像验证码
-    const isCaptchaValid = await checkCaptcha(passwordForm.captcha)
+    const isCaptchaValid = await checkCaptcha(passwordForm.kaptChaCode)
     if (!isCaptchaValid) {
-      passwordForm.captcha = ''
+      passwordForm.kaptChaCode = ''
       await refreshCaptcha()
       return
+    }
+
+    // 确保UUID已设置
+    if (!passwordForm.uuid) {
+      passwordForm.uuid = captchaUuid.value
     }
 
     const {code, data} = await api_login(passwordForm)
@@ -223,7 +225,6 @@ const handlePasswordLogin = async () => {
       await refreshCaptcha()
     }
   } catch (error) {
-    console.error('登录错误:', error)
     ElMessage.error('网络错误，请检查网络连接后重试')
     // 出错时刷新验证码
     await refreshCaptcha()
@@ -234,7 +235,7 @@ const handlePasswordLogin = async () => {
 
 // 处理邮箱验证码登录
 const handleEmailLogin = async () => {
-  if (!emailForm.account || !emailForm.emailCode || !emailForm.captcha) {
+  if (!emailForm.account || !emailForm.emailCode || !emailForm.kaptChaCode) {
     ElMessage.warning('请填写完整信息')
     return
   }
@@ -242,14 +243,18 @@ const handleEmailLogin = async () => {
   loading.value = true
   try {
     // 先校验图像验证码
-    const isCaptchaValid = await checkCaptcha(emailForm.captcha, emailCaptchaUuid.value)
+    const isCaptchaValid = await checkCaptcha(emailForm.kaptChaCode, emailCaptchaUuid.value)
     if (!isCaptchaValid) {
       ElMessage.error('图像验证码错误，请重新输入')
-      emailForm.captcha = ''
+      emailForm.kaptChaCode = ''
       await refreshEmailCaptcha()
       return
     }
 
+    // 确保UUID已设置
+    if (!emailForm.uuid) {
+      emailForm.uuid = emailCaptchaUuid.value
+    }
     const {code, data} = await api_email_login(emailForm)
     if (code === 0) {
       ElMessage.success("登录成功")
@@ -262,7 +267,6 @@ const handleEmailLogin = async () => {
       await refreshEmailCaptcha()
     }
   } catch (error) {
-    console.error('邮箱登录错误:', error)
     ElMessage.error('网络错误，请检查网络连接后重试')
     // 出错时刷新验证码
     await refreshEmailCaptcha()
@@ -283,18 +287,30 @@ const sendCode = async () => {
     return
   }
 
-  if (!emailForm.captcha) {
+  if (!emailForm.kaptChaCode) {
     ElMessage.warning('请先输入图像验证码')
     return
   }
   try {
-     const isCaptchaValid = await checkCaptcha(emailForm.captcha, emailCaptchaUuid.value)
+     const isCaptchaValid = await checkCaptcha(emailForm.kaptChaCode, emailCaptchaUuid.value)
      if (!isCaptchaValid) {
-       emailForm.captcha = ''
+       emailForm.kaptChaCode = ''
        await refreshEmailCaptcha()
        return
      }
-    const {code} = await api_send_email(emailForm.account)
+
+    // 确保UUID已设置
+    if (!emailForm.uuid) {
+      emailForm.uuid = emailCaptchaUuid.value
+    }
+
+    const sendEmailParams = {
+      email: emailForm.account,
+      kaptChaCode: emailForm.kaptChaCode,
+      uuid: emailForm.uuid
+    }
+
+    const {code} = await api_send_email(sendEmailParams)
     if (code === 0) {
       ElMessage.success("发送成功")
     }
@@ -314,13 +330,12 @@ const sendCode = async () => {
 const refreshCaptcha = async () => {
   try {
     captchaUuid.value = generateUUID()
+    passwordForm.uuid = captchaUuid.value // 设置UUID到表单
     const {code,msg} = await api_getImg_code(captchaUuid.value)
     if (code === 0 && msg) {
       captchaUrl.value = `data:image/jpeg;base64,${msg}`
-      console.log('验证码获取成功')
     }
   } catch (error) {
-    console.error('获取验证码失败:', error)
     ElMessage.error('获取验证码失败，请重试')
   }
 }
@@ -329,13 +344,12 @@ const refreshCaptcha = async () => {
 const refreshEmailCaptcha = async () => {
   try {
     emailCaptchaUuid.value = generateUUID()
+    emailForm.uuid = emailCaptchaUuid.value // 设置UUID到表单
     const {code,msg} = await api_getImg_code(emailCaptchaUuid.value)
     if (code === 0 && msg) {
       emailCaptchaUrl.value = `data:image/jpeg;base64,${msg}`
-      console.log('邮箱验证码获取成功')
     }
   } catch (error) {
-    console.error('获取邮箱验证码失败:', error)
     ElMessage.error('获取验证码失败，请重试')
   }
 }
@@ -345,10 +359,8 @@ const checkCaptcha = async (code: string, uuid?: string): Promise<boolean> => {
   try {
     const targetUuid = uuid || captchaUuid.value
     const response = await api_check_code(targetUuid, code)
-    console.log('验证码校验响应:', response)
     return response.code === 0
   } catch (error) {
-    console.error('校验验证码失败:', error)
     return false
   }
 }

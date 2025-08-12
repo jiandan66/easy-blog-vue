@@ -37,6 +37,7 @@
     <el-table :data="tableData" border style="width: 100%">
       <el-table-column prop="tagId" label="标签ID" min-width="180" show-overflow-tooltip/>
       <el-table-column prop="tagName" label="标签名称" min-width="120" show-overflow-tooltip/>
+      <el-table-column prop="tagType" label="标签类型" min-width="120" show-overflow-tooltip/>
       <el-table-column label="操作" min-width="150" fixed="right" align="center">
         <template #default="scope">
           <el-button size="small" @click="handleEditTag(scope.row)">编辑</el-button>

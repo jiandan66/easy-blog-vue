@@ -108,5 +108,33 @@ export const api_dict_save = (body: any) => post("/dict/saveDict",body);
  */
 export const api_dict_del = (dictId: any) => del (`/dict/deleteDict?dictId=${dictId}`);
 
+/**
+ * 博客列表
+ * @param body
+ */
+export const api_article_list = (body: any) => post("/modules/article/pageArticle",body);
+/**
+ * 编辑博客
+ * @param body
+ */
+export const api_article_edit = (body: any) => put("/modules/article/updateArticle",body);
+/**
+ * 新增博客
+ * @param body
+ */
+export const api_article_save = (body: any) => post("/modules/article/insertArticle",body);
+/**
+ * 删除博客
+ * @param articleId
+ */
+export const api_article_del = (articleId: any) => del (`/modules/article/deleteArticle?articleId=${articleId}`);
+
+/**
+ * 获取博客详情
+ * @param articleId
+ */
+export const api_article_detail = (articleId: any) => get(`/modules/article/getArticleById?articleId=${articleId}`);
+
+
 
 

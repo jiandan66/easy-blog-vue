@@ -35,6 +35,21 @@ const routes: RouteRecordRaw[] = [
                 path: '/blog/system/dict',
                 name: 'Dict',
                 component: () => import('@/page/system/dict.vue')
+            },
+            {
+                path: '/blog/article/list',
+                name: 'Article',
+                component: () => import('@/page/article/article.vue')
+            },
+            {
+                path: '/blog/article/add',
+                name: 'ArticleAdd',
+                component: () => import('@/page/article/article-edit.vue')
+            },
+            {
+                path: '/blog/article/edit/:id',
+                name: 'ArticleEdit',
+                component: () => import('@/page/article/article-edit.vue')
             }
         ]
     }

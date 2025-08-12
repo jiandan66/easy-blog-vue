@@ -84,6 +84,9 @@
         <el-form-item label="标签名称" prop="nickname">
           <el-input v-model="editForm.tagName" placeholder="请输入标签名称"/>
         </el-form-item>
+        <el-form-item label="标签类型" prop="nickname">
+          <el-input v-model="editForm.tagType" placeholder="请输入标签类型"/>
+        </el-form-item>
       </el-form>
 
       <template #footer>
@@ -143,6 +146,7 @@ const pagination = reactive({
 const editForm = reactive({
   tagId: '' as string | number,
   tagName: '',
+  tagType: '',
 });
 
 
@@ -213,6 +217,7 @@ const handleEditTag = async (row: TagItem) => {
   isEdit.value = true;
   editForm.tagId = row.tagId || '';
   editForm.tagName = row.tagName;
+  editForm.tagType = row.tagType;
   editDialogVisible.value = true;
 };
 
@@ -220,6 +225,7 @@ const handleEditTag = async (row: TagItem) => {
 const resetEditForm = () => {
   editForm.tagId = '';
   editForm.tagName = '';
+  editForm.tagType = '';
   editFormRef.value?.clearValidate();
 };
 

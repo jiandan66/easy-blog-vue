@@ -135,6 +135,30 @@ export const api_article_del = (articleId: any) => del (`/modules/article/delete
  */
 export const api_article_detail = (articleId: any) => get(`/modules/article/getArticleById?articleId=${articleId}`);
 
+/**
+ * 后管用户列表
+ * @param body
+ */
+export const api_admin_user_list = (body: any) => post("/user/pageList", body);
+
+/**
+ * 新增/修改后管用户（有id为修改，无id为新增）
+ * @param body { id?, userName, password, email, userType, userStatus }
+ */
+export const api_admin_user_save_or_update = (body: any) => post("/user/saveOrUpdateUser", body);
+
+/**
+ * 分配用户菜单权限
+ * @param body { userId, menuIdList[] }
+ */
+export const api_user_menu_allot = (body: any) => post("/user/menu/allotMenu", body);
+
+/**
+ * 获取指定用户的菜单权限
+ * @param userId
+ */
+export const api_user_menu_list = (userId: string) => get("/menu/menu", {userId});
+
 
 
 

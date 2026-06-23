@@ -254,6 +254,16 @@ const handleLogout = () => {
   router.push('/login')
 }
 
+// 递归过滤掉按钮类型(type=2)的菜单
+const filterMenuTree = (menus: any[]): any[] => {
+  return menus
+    .filter((menu: any) => menu.type !== 2)
+    .map((menu: any) => ({
+      ...menu,
+      list: menu.list ? filterMenuTree(menu.list) : []
+    }));
+};
+
 // 初始化菜单数据
 const initMenuData = () => {
   const userInfo = localStorage.getItem('userInfo')
@@ -261,7 +271,7 @@ const initMenuData = () => {
     try {
       const data = JSON.parse(userInfo)
       userName.value = data.userName || 'admin'
-      menuList.value = data.menuList || []
+      menuList.value = filterMenuTree(data.menuList || [])
     } catch (error) {
       console.error('解析用户信息失败:', error)
       userName.value = 'admin'
